@@ -7,7 +7,7 @@ CC = g++ -std=c++14
 
 # CC = g++ -std=c++17
 
-CFLAGS = -g -I/usr/include/jsoncpp
+CFLAGS = -g -I/usr/include/jsoncpp -I/opt/homebrew/include
 
 LDFLAGS = 	-L/opt/homebrew/lib/ -ljsoncpp			\
 		-lmicrohttpd -ljsonrpccpp-common		\
