@@ -1,0 +1,14 @@
+[
+    {
+        "name": "participate",
+        "params": {
+            "action": "attending",
+	    "student_id": "id",
+	    "pass": "whatever"
+        },
+        "returns": {
+            "action": "response",
+	    "response": "jsonstr"
+        }
+    }
+]
