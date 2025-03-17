@@ -4,7 +4,7 @@
 # https://github.com/cinemast/libjson-rpc-cpp
 
 CC = g++ -std=c++17
-CFLAGS = -g
+CFLAGS = -g -I/usr/include/jsoncpp
 
 LDFLAGS = 	-L/opt/homebrew/lib/ -ljsoncpp			\
 		-lmicrohttpd -ljsonrpccpp-common		\
