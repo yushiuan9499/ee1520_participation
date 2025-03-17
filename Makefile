@@ -10,7 +10,7 @@ LDFLAGS = 	-L/opt/homebrew/lib/ -ljsoncpp			\
 		-lmicrohttpd -ljsonrpccpp-common		\
 		-ljsonrpccpp-server -ljsonrpccpp-client -lcurl
 
-INC	=	ecs36b_Common.h
+INC	=	ee1520_Common.h
 
 INC_CL	=	JvTime.h
 OBJ	=	JvTime.o ee1520_JSON.o ee1520_Exception.o

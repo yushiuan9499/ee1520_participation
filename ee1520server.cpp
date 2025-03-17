@@ -117,6 +117,9 @@ Myee1520Server::participate
 	    lv_log["arg action"] = action;
 	    lv_log["arg pass"] = pass;
 	    lv_log["arg vid"] = (lv_students[i]["vname"]).asString();
+	    result["vname"] = (lv_students[i]["vname"]).asString();
+	    result["name"] = (lv_students[i]["name"]).asString();
+	    result["id"] = (lv_students[i]["id"]).asString();
 	    myPrintLog(lv_log.toStyledString(), "./config/ee1520server.log");
 	    
 	    break;
