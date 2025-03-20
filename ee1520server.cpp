@@ -1,4 +1,6 @@
 
+// ngrok http --domain ethikos.ngrok.io http://localhost:8384
+
 // for Json::value
 #include <json/json.h>
 #include <json/reader.h>
@@ -35,21 +37,18 @@ Myee1520Server::Myee1520Server(AbstractServerConnector &connector, serverVersion
 
 // member functions
 
+std::string p_secret { "something" };
+
 Json::Value
 Myee1520Server::participate
 (const std::string& action, const std::string& pass, const std::string& studentid)
 {
   Json::Value lv_log;
-  // lv_log["arg action"] = action;
-  // lv_log["arg pass"] = pass;
-  // lv_log["arg studentid"] = studentid;
-  // myPrintLog(lv_log.toStyledString(), "./config/ee1520server.log");
   
   int i;
   int error_code = 0;
   int rc = 0;
   Json::Value result;
-  result["status"] = "successful";
 
   char buf_fname1[256];
   bzero(buf_fname1, 256);
@@ -62,13 +61,27 @@ Myee1520Server::participate
   ee1520_Exception * lv_exception_ptr = &lv_exception;
 
   try {
+    if (pass != p_secret)
+      {
+	// printf("here 1\n");
+	ei_ptr = new Exception_Info {};
+	ei_ptr->where_code = EE1520_ERROR_JSONRPC_SERVER;
+	ei_ptr->which_string = ("incorrect pass code");
+	ei_ptr->how_code = EE1520_ERROR_NORMAL;
+	ei_ptr->what_code = EE1520_ERROR_JSON_KEY_MISSING;
+	(lv_exception_ptr->info_vector).push_back(ei_ptr);
+	// error_code = -9;
+	throw (*lv_exception_ptr);
+    }
+  
     if (action != "participate")
       {
+	// printf("here 2\n");
 	ei_ptr = new Exception_Info {};
 	ei_ptr->where_code = EE1520_ERROR_JSONRPC_SERVER;
 	ei_ptr->which_string = ("action " + action + " mismatched");
 	ei_ptr->how_code = EE1520_ERROR_NORMAL;
-	ei_ptr->what_code = EE1520_ERROR_JSON_PARSING;
+	ei_ptr->what_code = EE1520_ERROR_JSON2OBJECT_ACTION;
 	(lv_exception_ptr->info_vector).push_back(ei_ptr);
 	// error_code = -9;
 	throw (*lv_exception_ptr);
@@ -77,11 +90,12 @@ Myee1520Server::participate
     rc = myFile2JSON(buf_fname1, &lv_students);
     if (rc != 0)
       {
+	// printf("here 3\n");
 	ei_ptr = new Exception_Info {};
 	ei_ptr->where_code = EE1520_ERROR_JSONRPC_SERVER;
-	ei_ptr->which_string = ("action " + action + " mismatched");
+	ei_ptr->which_string = "student file failed to open";
 	ei_ptr->how_code = EE1520_ERROR_NORMAL;
-	ei_ptr->what_code = EE1520_ERROR_JSON_PARSING;
+	ei_ptr->what_code = EE1520_ERROR_FILE_NOT_EXIST;
 	(lv_exception_ptr->info_vector).push_back(ei_ptr);
 	throw (*lv_exception_ptr);
 	// error_code = rc;
@@ -92,11 +106,12 @@ Myee1520Server::participate
     if((lv_students.isNull() == true) ||
        (lv_students.isArray() == false))
       {
+	// // printf("here 4\n");
 	ei_ptr = new Exception_Info {};
 	ei_ptr->where_code = EE1520_ERROR_JSONRPC_SERVER;
-	ei_ptr->which_string = ("action " + action + " mismatched");
+	ei_ptr->which_string = "student file not array";
 	ei_ptr->how_code = EE1520_ERROR_NORMAL;
-	ei_ptr->what_code = EE1520_ERROR_JSON_PARSING;
+	ei_ptr->what_code = EE1520_ERROR_JSON_KEY_TYPE_MISMATCHED;
 	(lv_exception_ptr->info_vector).push_back(ei_ptr);
 	throw (*lv_exception_ptr);
 	// error_code = -1;
@@ -110,29 +125,58 @@ Myee1520Server::participate
       {
 	if ((lv_students[i]["id"]).asString() == studentid)
 	  {
+	    // printf("here 5\n");
+
 	    st_idx = i;
 	    found = 1;
 
+	    JvTime * my_ptr = getNowJvTime();
+	    std::string tmp_s;
+	    if ((lv_students[i][p_secret]).isNull() == true)
+	      {
+		(lv_students[i][p_secret]) = *(my_ptr->dump2JSON());
+		tmp_s = "successful";
+	      }
+	    else
+	      {
+		tmp_s = "already registered";
+	      }
+	    result = (lv_students[i]);
+	    result["time stamp"] = *(my_ptr->dump2JSON());
+	    result["status"] = tmp_s;
+
 	    Json::Value lv_log;
+	    
 	    lv_log["arg action"] = action;
 	    lv_log["arg pass"] = pass;
 	    lv_log["arg vid"] = (lv_students[i]["vname"]).asString();
-	    result["vname"] = (lv_students[i]["vname"]).asString();
-	    result["name"] = (lv_students[i]["name"]).asString();
-	    result["id"] = (lv_students[i]["id"]).asString();
+	    lv_log["time"] = *(my_ptr->dump2JSON());
 	    myPrintLog(lv_log.toStyledString(), "./config/ee1520server.log");
-	    
+
+	    rc = myJSON2File(buf_fname1, &lv_students);
+	    if (rc != 0)
+	      {
+		// printf("here 6\n");
+		ei_ptr = new Exception_Info {};
+		ei_ptr->where_code = EE1520_ERROR_JSONRPC_SERVER;
+		ei_ptr->which_string = "student file failed to modify";
+		ei_ptr->how_code = EE1520_ERROR_NORMAL;
+		ei_ptr->what_code = EE1520_ERROR_FILE_WRITE;
+		(lv_exception_ptr->info_vector).push_back(ei_ptr);
+		throw (*lv_exception_ptr);
+	      }
 	    break;
 	  }
       }
 
     if (found == 0)
       {
+	// printf("here 7\n");
 	ei_ptr = new Exception_Info {};
 	ei_ptr->where_code = EE1520_ERROR_JSONRPC_SERVER;
-	ei_ptr->which_string = ("action " + action + " mismatched");
+	ei_ptr->which_string = "student not found";
 	ei_ptr->how_code = EE1520_ERROR_NORMAL;
-	ei_ptr->what_code = EE1520_ERROR_JSON_PARSING;
+	ei_ptr->what_code = EE1520_ERROR_FILE_NOT_EXIST;
 	(lv_exception_ptr->info_vector).push_back(ei_ptr);
 	throw (*lv_exception_ptr);
 	// error_code = EE1520_ERROR_VSID_POST_ID;
@@ -142,11 +186,15 @@ Myee1520Server::participate
 
   } catch (ee1520_Exception& e) {
     std::cerr << e.what() << std::endl;
+    Json::Value result_json;
+    int erc = produceErrorJSON(e, "./config/ee1520server_error.log", &result_json, 0);
+    std::cerr << result_json << std::endl;
+    result["json"] = result_json;
     result["reason"] = e.what();
-    result["error_code"] = error_code;
     result["status"] = "failed";
   }
 
+  // printf("here 9\n");
   lv_log["result"] = result;
   myPrintLog(lv_log.toStyledString(), "./config/ee1520server.log");
   

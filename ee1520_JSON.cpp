@@ -286,17 +286,17 @@ int
 produceErrorJSON
 (ee1520_Exception e, const char log_file_name[], Json::Value *jv_ptr, int extra)
 {
-  printf("Producing errors\n");
+  // printf("Producing errors\n");
   if (((e.info_vector).size() <= 0) ||
       (jv_ptr == NULL) ||
       (log_file_name == NULL))
     return EE1520_ERROR_NULL_JSON_PTR;
 
-  printf("Producing errors Check 2\n");
-
-  jv_ptr = e.dump2JSON();
+  // printf("Producing errors Check 2\n");
+  (*jv_ptr) = (*(e.dump2JSON()));
   myPrintLog((*jv_ptr).toStyledString(), log_file_name);
-  printf("Produced errors\n");
+  
+  // printf("Produced errors\n");
   return EE1520_ERROR_NORMAL;
 }
 

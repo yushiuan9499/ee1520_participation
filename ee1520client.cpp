@@ -18,9 +18,9 @@ main()
   // HttpClient httpclient("http://127.0.0.1:8384");
 
   // connecting to your instructor's laptop
-  HttpClient httpclient("https://ethikos.ngrok.io");
-  
+  HttpClient httpclient("https://ethikos.ngrok.io");  
   ee1520Client myClient(httpclient, JSONRPC_CLIENT_V2);
+  
   Json::Value myv;
   Json::Value jv_list;
 
