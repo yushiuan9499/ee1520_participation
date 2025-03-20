@@ -1,0 +1,6 @@
+*.o
+response.json
+ee1520server
+ee1520client
+ee1520server.h
+ee1520client.h
