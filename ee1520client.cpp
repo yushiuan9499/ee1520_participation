@@ -15,14 +15,18 @@ using namespace std;
 int main(int argc, char *argv[]) {
   // test for yourself
   // HttpClient httpclient("http://127.0.0.1:8384");
+  const string HOME = getenv("HOME");
+  const string LOGS_FILE =
+      HOME + "/.local/share/ee1520_participation/logs.json";
 
+  system("mkdir -p ~/.local/share/ee1520_participation");
   if (argc != 2) {
     cerr << "must provide exactly a message" << endl;
     return 1;
   }
   cout << "Sending msg: " << argv[1] << endl;
   {
-    ifstream responseFile("response.json");
+    ifstream responseFile(LOGS_FILE);
     if (responseFile.good()) {
       Json::Value prevResponse;
       responseFile >> prevResponse;
@@ -31,6 +35,7 @@ int main(int argc, char *argv[]) {
         return 0;
       }
     }
+    responseFile.close();
   }
   // connecting to your instructor's laptop
   HttpClient httpclient("https://ethikos.ngrok.io");
@@ -46,9 +51,15 @@ int main(int argc, char *argv[]) {
     cerr << e.what() << endl;
   }
 
+  cout << "hit" << endl;
   if (myv["status"] != "failed") {
-    ofstream responseFile("response.json");
+    ofstream responseFile(LOGS_FILE);
+    if (!responseFile.good()) {
+      cerr << "Failed to write to file" << endl;
+      return 1;
+    }
     responseFile << myv.toStyledString();
+    responseFile.close();
   }
   std::cout << myv.toStyledString() << std::endl;
   return 0;
