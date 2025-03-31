@@ -52,7 +52,7 @@ int main(int argc, char *argv[]) {
   }
 
   cout << "hit" << endl;
-  if (myv["status"] != "failed") {
+  if (myv["status"] == "successful" || myv["status"] == "already registered") {
     ofstream responseFile(LOGS_FILE);
     if (!responseFile.good()) {
       cerr << "Failed to write to file" << endl;
